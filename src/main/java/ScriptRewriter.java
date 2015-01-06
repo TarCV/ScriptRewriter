@@ -1,12 +1,13 @@
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 /**
- * Created by const on 25.11.14.
+ * Created by TarCV on 25.11.14.
  */
 public class ScriptRewriter {
     public static void main(String[] args) throws IOException {
-        String path = args[0];
+        Path path = FileSystems.getDefault().getPath(args[0]);
         ParsedScript script = new ParsedScript(path);
     }
 }
