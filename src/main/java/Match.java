@@ -5,19 +5,26 @@ import java.util.regex.Pattern;
  */
 public class Match {
     private final Pattern pattern;
-    private final String match;
 
-    public Match(Pattern pattern, String match) {
+    private final String originalFragment;
+    private final String preprocessedFragment;
+
+    public Match(Pattern pattern, String originalFragment, String preprocessedFragment) {
 
         this.pattern = pattern;
-        this.match = match;
+        this.originalFragment = originalFragment;
+        this.preprocessedFragment = preprocessedFragment;
+    }
+
+    public String getOriginalFragment() {
+        return originalFragment;
     }
 
     public Pattern getPattern() {
         return pattern;
     }
 
-    public String getMatch() {
-        return match;
+    public String getPreprocessedFragment() {
+        return preprocessedFragment;
     }
 }

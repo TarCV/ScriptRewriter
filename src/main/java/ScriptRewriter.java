@@ -13,9 +13,9 @@ public class ScriptRewriter implements IMatchListener {
     private static final RepeatingReplacePattern PATTERN_LINECOMMENT = new RepeatingReplacePattern("(?m)//.*?$", ' ');
     private static final RepeatingReplacePattern PATTERN_BLOCKCOMMENT = new RepeatingReplacePattern("/\\*[\\s\\S]*?\\*/", ' ');
     private static final RepeatingReplacePattern PATTERN_STRING = new RepeatingReplacePattern("([\"'])(?:\\\\?.)*?\\1", 'Z');
-    private static final Pattern PATTERN_BLOCKSTART = Pattern.compile("[^;{]*[^;{\\s]*\\{");
+    private static final Pattern PATTERN_BLOCKSTART = Pattern.compile("[^;{\\s][^;{]*[^;{\\s]*\\{");
     private static final Pattern PATTERN_BLOCKEND = Pattern.compile("\\}");
-    private static final Pattern PATTERN_EXPRESSION = Pattern.compile("[\\s\\S]*?;");
+    private static final Pattern PATTERN_EXPRESSION = Pattern.compile("\\S[\\s\\S]*?;");
 
     private final Path path;
 
@@ -56,7 +56,7 @@ public class ScriptRewriter implements IMatchListener {
     @Override
     public void gotMatch(Match match) {
         System.out.println("Found " + match.getPattern());
-        System.out.println(match.getMatch());
+        System.out.println(match.getPreprocessedFragment());
         System.out.println("===");
     }
 }

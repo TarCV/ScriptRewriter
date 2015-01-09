@@ -11,19 +11,19 @@ import java.util.regex.Pattern;
  * Created by TarCV.
  */
 public class ScriptParser {
-    private final List<MatchResult> replacementList = new ArrayList<>();
     private final List<IMatchListener> matchListenerList = new ArrayList<>();
+    private final String originalScript;
     private List<RepeatingReplacePattern> preprocessorPatterns = new ArrayList<>();
     private List<Pattern> parserPatterns = new ArrayList<>();
-
     private String script = null;
+    private boolean preprocessorCalled = false;
 
     public ScriptParser(Path path) throws IOException {
-        script = new String(Files.readAllBytes(path), "UTF-8");
+        originalScript = script = new String(Files.readAllBytes(path), "UTF-8");
     }
 
     public ScriptParser setPreprocessorPatterns(List<RepeatingReplacePattern> patterns) {
-        if (!replacementList.isEmpty()) {
+        if (preprocessorCalled) {
             throw new RuntimeException("Preprocessor will not be called again, no need to setup it");
         }
 
@@ -37,7 +37,7 @@ public class ScriptParser {
     }
 
     public void parse() {
-        if (replacementList.isEmpty()) {
+        if (!preprocessorCalled) {
             preprocessScript();
         }
         doParse();
@@ -55,8 +55,9 @@ public class ScriptParser {
         }
     }
 
-    private String preprocessScript() {
-        assert (replacementList.isEmpty());
+    private void preprocessScript() {
+        assert (!preprocessorCalled);
+        preprocessorCalled = true;
 
         String processing = script;
         for (RepeatingReplacePattern pattern : preprocessorPatterns) {
@@ -64,28 +65,35 @@ public class ScriptParser {
             Matcher replacer = pattern.getPattern().matcher(processing);
             while (replacer.find()) {
                 MatchResult match = replacer.toMatchResult();
-                replacementList.add(match);
+
+                assert (match.group().length() == pattern.getReplacementFor(match).length());
                 replacer.appendReplacement(buffer, pattern.getReplacementFor(match));
             }
             replacer.appendTail(buffer);
             processing = buffer.toString();
         }
-        return processing;
+        script = processing;
     }
 
     private void doParse() {
-        String processing = script;
+        int begin = 0;
+
         resetmatcher:
-        while (!processing.isEmpty()) {
-            for (Pattern p : parserPatterns) {
-                Matcher m = p.matcher(processing);
+        while (begin != script.length()) {
+            for (Pattern pattern : parserPatterns) {
+                Matcher m = pattern.matcher(script);
+                m.region(begin, m.regionEnd());
+
                 if (m.lookingAt()) {
-                    String matched = processing.substring(0, m.end());
-                    processing = processing.substring(m.end());
-                    callMatchListeners(new Match(p, matched));
+                    String originalFragment = originalScript.substring(begin, m.end());
+                    String preprocessedFragment = script.substring(begin, m.end());
+                    callMatchListeners(new Match(pattern, originalFragment, preprocessedFragment));
+
+                    begin = m.end();
                     continue resetmatcher;
                 }
             }
+
             //TODO: call event listener for "nothing found" error
             return;
         }
