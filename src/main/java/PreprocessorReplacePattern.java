@@ -3,13 +3,13 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 /**
- * Created by const on 05.01.15.
+ * Created by TarCV.
  */
-public class RepeatingReplacePattern {
+public class PreprocessorReplacePattern {
     private final Pattern pattern;
     private final char replacer;
 
-    public RepeatingReplacePattern(String pattern, char replacer) {
+    public PreprocessorReplacePattern(String pattern, char replacer) {
         this.pattern = Pattern.compile(pattern);
         this.replacer = replacer;
     }

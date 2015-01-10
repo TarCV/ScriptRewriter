@@ -1,15 +1,13 @@
-import java.util.regex.Pattern;
-
 /**
  * Created by TarCV.
  */
 public class Match {
-    private final Pattern pattern;
+    private final ParserPattern pattern;
 
     private final String originalFragment;
     private final String preprocessedFragment;
 
-    public Match(Pattern pattern, String originalFragment, String preprocessedFragment) {
+    public Match(ParserPattern pattern, String originalFragment, String preprocessedFragment) {
 
         this.pattern = pattern;
         this.originalFragment = originalFragment;
@@ -20,7 +18,7 @@ public class Match {
         return originalFragment;
     }
 
-    public Pattern getPattern() {
+    public ParserPattern getPattern() {
         return pattern;
     }
 

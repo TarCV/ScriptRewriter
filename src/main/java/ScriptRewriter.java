@@ -8,14 +8,23 @@ import java.util.regex.Pattern;
  * Created by TarCV.
  */
 public class ScriptRewriter implements IMatchListener {
-    private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
-    private static final RepeatingReplacePattern PATTERN_MACRO = new RepeatingReplacePattern("(?m)^\\s*#.*?$", ' ');
-    private static final RepeatingReplacePattern PATTERN_LINECOMMENT = new RepeatingReplacePattern("(?m)//.*?$", ' ');
-    private static final RepeatingReplacePattern PATTERN_BLOCKCOMMENT = new RepeatingReplacePattern("/\\*[\\s\\S]*?\\*/", ' ');
-    private static final RepeatingReplacePattern PATTERN_STRING = new RepeatingReplacePattern("([\"'])(?:\\\\?.)*?\\1", 'Z');
-    private static final Pattern PATTERN_BLOCKSTART = Pattern.compile("[^;{\\s][^;{]*[^;{\\s]*\\{");
-    private static final Pattern PATTERN_BLOCKEND = Pattern.compile("\\}");
-    private static final Pattern PATTERN_EXPRESSION = Pattern.compile("\\S[\\s\\S]*?;");
+    private static final PreprocessorReplacePattern PATTERN_MACRO = new PreprocessorReplacePattern("(?m)^\\s*#.*?$", ' ');
+    private static final PreprocessorReplacePattern PATTERN_LINECOMMENT = new PreprocessorReplacePattern("(?m)//.*?$", ' ');
+    private static final PreprocessorReplacePattern PATTERN_BLOCKCOMMENT = new PreprocessorReplacePattern("/\\*[\\s\\S]*?\\*/", ' ');
+    private static final PreprocessorReplacePattern PATTERN_STRING = new PreprocessorReplacePattern("([\"'])(?:\\\\?.)*?\\1", 'Z');
+
+    private static final ParserPattern PATTERN_IGNORED_TO_EOL =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_PREPROCESSED, Pattern.compile("(?m)\\s+$"));
+    private static final ParserPattern PATTERN_INDENT =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_ORIGINAL, Pattern.compile("(?m)^[ \\t]+"));
+    private static final ParserPattern PATTERN_IGNORED_LINE_BEGINNING =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_PREPROCESSED, Pattern.compile("(?m)^\\s+(?=\\S)"));
+    private static final ParserPattern PATTERN_BLOCK_START =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_PREPROCESSED, Pattern.compile("[^;{\\s][^;{]*[^;{\\s]*\\{"));
+    private static final ParserPattern PATTERN_BLOCK_END =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_PREPROCESSED, Pattern.compile("\\}"));
+    private static final ParserPattern PATTERN_EXPRESSION =
+            new ParserPattern(ParserPattern.AgainstWhat.AGAINST_PREPROCESSED, Pattern.compile("\\S[\\s\\S]*?;"));
 
     private final Path path;
 
@@ -42,9 +51,11 @@ public class ScriptRewriter implements IMatchListener {
         ));
 
         parser.setParserPatterns(Arrays.asList(
-                PATTERN_WHITESPACE,
-                PATTERN_BLOCKSTART,
-                PATTERN_BLOCKEND,
+                PATTERN_IGNORED_TO_EOL,
+                PATTERN_INDENT,
+                PATTERN_IGNORED_LINE_BEGINNING,
+                PATTERN_BLOCK_START,
+                PATTERN_BLOCK_END,
                 PATTERN_EXPRESSION
         ));
 
